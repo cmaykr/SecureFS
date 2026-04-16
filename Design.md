@@ -73,6 +73,12 @@ Contains a list of the access control that should be enforced for each file
 ## STM - Secure Storage Mechanism
     - Uses TPM or other similar mechanisms to securely store and handle all the encryption
 
+## UI
+- Download files
+- View files
+- Upload files
+- Edit files?
+
 
 # Usage steps, Algorithm
 - Every action is checked for authorization.
