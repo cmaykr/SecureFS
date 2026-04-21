@@ -2,6 +2,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <limits>
+#include <vector>
 
 File *SFS::createFile(File & newFileMetadata, const char* data)
 {
@@ -20,8 +23,21 @@ File *SFS::createFile(File & newFileMetadata, const char* data)
     return nullptr;
 }
 
-char* SFS::readFile(File* file) const
+std::vector<char> SFS::readFile(File const& file) const
 {
     // Read file and return the data.
     // Should the data be copied?
+
+    std::ifstream ifs{file.getName()};
+    std::vector<char> data{};
+
+    int i = 0;
+    char c{};
+    while (ifs.get(c))
+    {
+        data.push_back(c);
+        ++i;
+    }
+
+    return data;
 }

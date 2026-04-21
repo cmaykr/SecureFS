@@ -11,7 +11,7 @@ public:
         : sfs{sfs}
     {}
 
-    char* getObject(User const& user, Object* objMetadata);
+    std::vector<char> getObject(User const& user, Object* objMetadata);
 
 private:
     SFS* sfs;

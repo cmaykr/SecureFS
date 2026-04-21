@@ -1,8 +1,10 @@
 #include "SAH.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <iterator>
 
-char *SAH::getObject(User const &user, Object *objMetadata)
+std::vector<char> SAH::getObject(User const &user, Object *objMetadata)
 {
     if (dynamic_cast<Directory*>(objMetadata) != nullptr)
     {
@@ -12,8 +14,9 @@ char *SAH::getObject(User const &user, Object *objMetadata)
     {
         // Object is of type File
 
-        return sfs->readFile(dynamic_cast<File*>(objMetadata));
+        std::vector<char> data {sfs->readFile(*dynamic_cast<File*>(objMetadata))};
+        return data;
     }
 
-    return "test";
+    return std::vector<char>{};
 }
