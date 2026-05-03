@@ -1,11 +1,13 @@
-#include "SAH.hpp"
+#include "userAccessHandler.hpp"
 
 #include <iostream>
 #include <algorithm>
 #include <iterator>
 
-std::vector<char> SAH::getObject(User const &user, Object *objMetadata)
+std::vector<char> UserAccessHandler::getObject(User const &user, Object *objMetadata)
 {
+    if (ah->authorizeUserActionOnObject(user, *objMetadata))
+
     if (dynamic_cast<Directory*>(objMetadata) != nullptr)
     {
         // Object is of type directory, return directory.

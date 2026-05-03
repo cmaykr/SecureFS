@@ -8,4 +8,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 include_directories(include)
 
-add_executable(secureFS src/SFS.cpp src/main.cpp src/SAH.cpp)
+add_executable(secureFS src/secureFileSystem.cpp src/main.cpp src/userAccessHandler.cpp src/authorizationHandler.cpp src/credentialStore.cpp)

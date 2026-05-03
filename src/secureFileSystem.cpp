@@ -1,4 +1,4 @@
-#include "SFS.hpp"
+#include "secureFileSystem.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -6,7 +6,7 @@
 #include <limits>
 #include <vector>
 
-File *SFS::createFile(File & newFileMetadata, const char* data)
+File *SecureFileSystem::createFile(File & newFileMetadata, const char* data)
 {
     std::ofstream istream{newFileMetadata.getName()};
 
@@ -23,7 +23,7 @@ File *SFS::createFile(File & newFileMetadata, const char* data)
     return nullptr;
 }
 
-std::vector<char> SFS::readFile(File const& file) const
+std::vector<char> SecureFileSystem::readFile(File const& file) const
 {
     // Read file and return the data.
     // Should the data be copied?

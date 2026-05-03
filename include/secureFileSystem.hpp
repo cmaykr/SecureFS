@@ -3,9 +3,10 @@
 #include "object.hpp"
 
 #include <vector>
+#include <map>
 
 
-class SFS
+class SecureFileSystem
 {
 public:
     File* createFile(File & newFile, const char* data);
@@ -13,5 +14,5 @@ public:
 
     Directory* getDirectory(std::string const& fileName) const;
 private:
-
+    std::map<std::string, Object> files;
 };
