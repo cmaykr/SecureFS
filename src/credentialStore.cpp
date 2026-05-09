@@ -2,7 +2,7 @@
 
 bool CredentialStore::addUser(User const &newUser)
 {
-    User user{newUser.username, std::string{}, newUser.password, newUser.securityLevel, newUser.securityDomain};
+    User user{newUser.username, newUser.password, newUser.securityLevel, newUser.securityDomain};
     users.try_emplace(user.username, user);
     /// Need to check if user already exists.
     return false;

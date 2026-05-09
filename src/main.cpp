@@ -8,17 +8,21 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 
 User loginUser(CredentialStore* cs)
 {
-    
+    std::string username{};
+    std::string password{};
 
-    return User{};
-}
+    std::cout << "Enter your username: ";
+    std::cin >> username;
+    std::cout << "Enter your password: ";
+    std::cin >> password;
 
-void userMenu(User const& loggedInUser)
-{
+    User authUser = cs->authenticateUser(User{username, password, 0, 0});
 
+    return authUser;
 }
 
 void createUserMenu(CredentialStore* cs)
@@ -39,8 +43,23 @@ void createUserMenu(CredentialStore* cs)
     std::cout << "Security domain: ";
     std::cin >> securityDomain;
 
-    User user{username, std::string{}, password, securityLevel, securityDomain};
+    User user{username,password, securityLevel, securityDomain};
     cs->addUser(user);
+}
+
+std::vector<std::string> tokenizer(std::string const& command)
+{
+    std::vector<std::string> tokens{};
+    std::istringstream ss{command};
+    
+    std::string token{};
+    while (getline(ss, token))
+    {
+        tokens.push_back(token);
+    }
+
+
+    return tokens;
 }
 
 int main()
@@ -71,31 +90,33 @@ int main()
 
 
 
+    
+    User currentUser{};
     bool exit = false;
+    std::cout << "Welcome to the secure file system handler!" << std::endl;
     while (exit == false)
     {
-        std::cout << "Choose an option: " << std::endl;
-        std::cout << "1. Login \n2. Create user \n3. Exit" << std::endl;
-        int choice{};
-        std::cin >> choice;
+        std::string command{};
+        getline(std::cin, command, '\n');
 
-        switch(choice)
+        std::vector<std::string> commandTokens {tokenizer(command)};
+
+        std::copy(std::begin(commandTokens), std::end(commandTokens), std::ostream_iterator<std::string>(std::cout, " "));
+        std::cout << std::endl;
+
+        if (command == "login")
         {
-            case 1:
-            {
-                User loggedInUser {loginUser(&cs)};
-                if (!loggedInUser.username.empty())
-                    userMenu(loggedInUser);
-                break;
-            }
-            case 2:
-                createUserMenu(&cs);
-                break;
-            case 3:
-                exit = true;
-                break;
-            default:
-                break;
+            currentUser = loginUser(&cs);
         }
+        else if (command == "createuser")
+        {
+            createUserMenu(&cs);
+        }
+        else
+        {
+            std::cout << "Invalid command!" << std::endl;
+        }
+
+        
     }
 }
