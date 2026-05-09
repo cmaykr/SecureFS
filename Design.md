@@ -70,7 +70,7 @@ Contains a list of the access control that should be enforced for each file
         - Create user credentials
         - Modify user
         - Delete user
-## STM - Secure Storage Mechanism
+## STM - Secure Storage Mechanism (Trusted Computing)
     - Uses TPM or other similar mechanisms to securely store and handle all the encryption
 
 ## UI

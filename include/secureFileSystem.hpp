@@ -14,5 +14,5 @@ public:
 
     Directory* getDirectory(std::string const& fileName) const;
 private:
-    std::map<std::string, Object> files;
+    std::map<std::string, Object> files; /// TODO: Use a database system for storing the metadata
 };
