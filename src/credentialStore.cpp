@@ -1,5 +1,7 @@
 #include "credentialStore.hpp"
 
+#include <iostream>
+
 bool CredentialStore::addUser(User const &newUser)
 {
     User user{newUser.username, newUser.password, newUser.securityLevel, newUser.securityDomain};
