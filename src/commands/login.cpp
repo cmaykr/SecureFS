@@ -1,17 +1,21 @@
 #include "Commands/login.hpp"
 
+#include <iostream>
 
-// User Login::operator()(User const& user, CredentialStore * cs)
-// {
-//     std::string username{};
-//     std::string password{};
-    
-//     std::cout << "Enter your username: ";
-//     std::cin >> username;
-//     std::cout << "Enter your password: ";
-//     std::cin >> password;
 
-//     User authUser = cs->authenticateUser(User{username, password, 0, 0});
+int Login::operator()(Context & context, std::vector<std::string> const& arguments)
+{
+    std::string username{};
+    std::string password{};
     
-//     return authUser;
-// }
+    std::cout << "Enter your username: ";
+    getline(std::cin, username, '\n');
+    std::cout << "Enter your password: ";
+    getline(std::cin, password, '\n');
+
+    User authUser = context.cs->authenticateUser(User{username, password, 0, 0});
+
+    context.session.setUser(authUser);
+    
+    return 0;
+}

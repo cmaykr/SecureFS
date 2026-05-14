@@ -7,5 +7,5 @@
 class Login : public Command
 {
 public:
-    // int operator()(User const& user, CredentialStore * cs) override;
+    int operator()(Context & context, std::vector<std::string> const& arguments) override;
 };

@@ -5,6 +5,7 @@
 #include "authorizationHandler.hpp"
 #include "credentialStore.hpp"
 #include "Commands/command.hpp"
+#include "Commands/login.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -65,65 +66,40 @@ std::vector<std::string> tokenizer(std::string const& command)
     return tokens;
 }
 
-class Session
+int read(Context & context, std::vector<std::string> const&)
 {
-public:
-    Session(CredentialStore * cs)
-        : cs{cs}
-    {
+    std::cout << "Current user: " << context.session.getUser().username << std::endl;
 
-    }
-
-    void operator()(std::vector<std::string> & args)
-    {
-        createSession();
-    }
-
-    void createSession()
-    {
-        std::string username{};
-        std::string password{};
-        std::cout << "Type in username and password:" << std::endl;
-        std::cout << "Username: ";
-        // std::cin >> username;
-        std::getline(std::cin, username);
-        std::cout << "Password: ";
-        // std::cin >> password;
-        std::getline(std::cin, password);
-
-        user = loginUser(username, password, cs);
-
-        if (user.authenticationToken == "1")
-        {
-            std::cout << "Login successful!" << std::endl;
-        }
-    }
-
-    User getUser() const
-    {
-        return user;
-    }
-private:
-    User user;
-    CredentialStore* cs;
-};
-
-void read(Session const& session)
-{
-    std::cout << "Current user: " << session.getUser().username << std::endl;
+    return 0;
 }
 
-// static std::map<std::string, std::function<void(std::vector<std::string>&)>> commands;
+int addUser(Context & context, std::vector<std::string> const&)
+{
+    createUserMenu(context.cs);
+
+    return 0;
+}
 
 int main()
 {
-    CredentialStore cs{};
+    std::unordered_map<std::string, std::function<int(Context&, std::vector<std::string>&)>> commands{};
 
+    commands.emplace("login", Login{});
+    commands.emplace("read", read);
+    commands.emplace("addUser", addUser);
+    
+    
+    CredentialStore cs{};
 
     User currentUser{};
     bool exit = false;
-    Session currentSession{&cs};
+    Session currentSession{};
+    currentSession.createSession();
+
+    Context context{&cs, currentSession};
     std::cout << "Welcome to the secure file system handler!" << std::endl;
+
+    Login login{};
     while (exit == false)
     {
         std::string command{};
@@ -131,35 +107,15 @@ int main()
         std::vector<std::string> commandTokens{};
         
         std::cout << "> ";
-        // std::cin >> command;
-
+        
         getline(std::cin, args, '\n');
         commandTokens = std::vector<std::string>{tokenizer(args)};
-
-        // while (std::cin >> command)
-        // {
-        //     commandTokens.push_back(command);
-        // }
-        // while (commandTokens.empty());
-        // {
-        //     std::cout << "> ";
-        //     getline(std::cin, command, '\n');
-        // }
 
         
         
         if (!commandTokens.empty())
         {
-            if (commandTokens.front() == "login")
-            {
-                currentSession.createSession();
-            }
-            else if (commandTokens.front() == "addUser")
-                createUserMenu(&cs);
-            else if (commandTokens.front() == "read")
-            {
-                read(currentSession);
-            }
+            commands[commandTokens.front()](context, commandTokens);
         }
     }
 }
