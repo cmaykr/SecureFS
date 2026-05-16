@@ -4,9 +4,12 @@
 #include <algorithm>
 #include <iterator>
 
-std::vector<char> UserAccessHandler::getObject(User const &user, Object *objMetadata)
+std::vector<char> UserAccessHandler::getObject(Session const& session, Object *objMetadata)
 {
-    if (ah->authorizeUserActionOnObject(user, *objMetadata))
+    if (!ah->authorizeUserActionOnObject(session.getUser(), *objMetadata))
+    {
+        return std::vector<char>{};
+    }
 
     if (dynamic_cast<Directory*>(objMetadata) != nullptr)
     {

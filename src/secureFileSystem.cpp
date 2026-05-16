@@ -8,17 +8,22 @@
 
 File *SecureFileSystem::createFile(File & newFileMetadata, const char* data)
 {
-    std::ofstream istream{newFileMetadata.getName()};
+    std::ofstream ostream(newFileMetadata.getName());
 
-    if (!istream.is_open())
+    // if (ostream.good())
+    // {
+    //     return nullptr;
+    // }
+
+    if (!ostream.is_open())
     {
         return nullptr;
     }
     else
     {
-        istream << data;
+        ostream << data;
 
-        istream.close();
+        ostream.close();
     }
     return nullptr;
 }

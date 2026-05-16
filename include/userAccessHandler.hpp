@@ -4,6 +4,7 @@
 #include "user.hpp"
 #include "secureFileSystem.hpp"
 #include "authorizationHandler.hpp"
+#include "session.hpp"
 
 class UserAccessHandler
 {
@@ -12,7 +13,7 @@ public:
         : sfs{sfs}, ah{ah}
     {}
 
-    std::vector<char> getObject(User const& user, Object* objMetadata);
+    std::vector<char> getObject(Session const& session, Object* objMetadata);
 
 private:
     SecureFileSystem* sfs;

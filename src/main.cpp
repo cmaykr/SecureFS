@@ -57,7 +57,7 @@ std::vector<std::string> tokenizer(std::string const& command)
     std::istringstream ss{command};
     
     std::string token{};
-    while (getline(ss, token))
+    while (getline(ss, token, ' '))
     {
         tokens.push_back(token);
     }
@@ -66,9 +66,20 @@ std::vector<std::string> tokenizer(std::string const& command)
     return tokens;
 }
 
-int read(Context & context, std::vector<std::string> const&)
+int read(Context & context, std::vector<std::string> const& args)
 {
-    std::cout << "Current user: " << context.session.getUser().username << std::endl;
+    if (args.size() != 2)
+        return -1;
+
+
+    File filename{args[1]};
+    std::vector<char> text {context.uah->getObject(context.session, &filename)};
+
+    if (text.empty())
+        return -1;
+
+    std::copy(std::begin(text), std::end(text), std::ostream_iterator<char>(std::cout, ""));
+    std::cout << std::endl;
 
     return 0;
 }
@@ -96,10 +107,16 @@ int main()
     Session currentSession{};
     currentSession.createSession();
 
-    Context context{&cs, currentSession};
+    SecureFileSystem sfs{};
+    AuthorizationHandler ah{&cs};
+    UserAccessHandler uah{&sfs, &ah};
+    Context context{&cs, &uah, currentSession};
     std::cout << "Welcome to the secure file system handler!" << std::endl;
 
     Login login{};
+    File text{"test.txt", 2, 2, 0, 0};
+    sfs.createFile(text, "hello");
+
     while (exit == false)
     {
         std::string command{};
@@ -111,8 +128,6 @@ int main()
         getline(std::cin, args, '\n');
         commandTokens = std::vector<std::string>{tokenizer(args)};
 
-        
-        
         if (!commandTokens.empty())
         {
             commands[commandTokens.front()](context, commandTokens);

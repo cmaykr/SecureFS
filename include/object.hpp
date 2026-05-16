@@ -55,12 +55,15 @@ private:
 
 class File : public Object
 {
-public:
+public: 
     File(std::string const& name, unsigned int securityDomain, unsigned int securityLevel, int size, FileType const& fileType)
-        : Object(name, securityDomain, securityLevel), size{size}, fileType{fileType}
+    : Object(name, securityDomain, securityLevel), size{size}, fileType{fileType}
     {
-
+        
     }
+    File(std::string const& name)
+        : File(name, 0, 0, 0, 0)
+    {}
 
     int getSize() const
     {
