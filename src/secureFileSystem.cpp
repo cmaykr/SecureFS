@@ -6,24 +6,31 @@
 #include <limits>
 #include <vector>
 
-File *SecureFileSystem::createFile(File & newFileMetadata, const char* data)
+SecureFileSystem::SecureFileSystem(std::string const &fileBasePath)
+    : files{}, baseDirectory{"/", 0, 0}, basePath{fileBasePath}
 {
-    std::ofstream ostream(newFileMetadata.getName());
+
+}
+
+File *SecureFileSystem::createFile(File &newFileMetadata, const char *data)
+{
+    std::ofstream ostream(basePath + "/" + newFileMetadata.getName());
 
     // if (ostream.good())
     // {
     //     return nullptr;
     // }
-
+    
     if (!ostream.is_open())
     {
+        std::cout << "Couldn't open file" << std::endl;
         return nullptr;
     }
     else
     {
         ostream << data;
-
         ostream.close();
+
     }
     return nullptr;
 }
@@ -33,7 +40,7 @@ std::vector<char> SecureFileSystem::readFile(File const& file) const
     // Read file and return the data.
     // Should the data be copied?
 
-    std::ifstream ifs{file.getName()};
+    std::ifstream ifs{basePath + "/" + file.getName()};
     std::vector<char> data{};
 
     int i = 0;

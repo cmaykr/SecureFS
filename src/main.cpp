@@ -69,8 +69,10 @@ std::vector<std::string> tokenizer(std::string const& command)
 int read(Context & context, std::vector<std::string> const& args)
 {
     if (args.size() != 2)
+    {
+        std::cout << "Invalid number of arguments!" << std::endl;
         return -1;
-
+    }
 
     File filename{args[1]};
     std::vector<char> text {context.uah->getObject(context.session, &filename)};
@@ -98,7 +100,20 @@ int main()
     commands.emplace("login", Login{});
     commands.emplace("read", read);
     commands.emplace("addUser", addUser);
-    
+
+    auto func = std::function<int(Context&, std::vector<std::string>&)>([&commands](Context & context, std::vector<std::string> const&)
+        {
+            auto it = commands.begin();
+
+            std::cout << "Commands: " << std::endl;
+            for (; it != commands.end(); ++it)
+            {
+                std::cout << "  " << it->first << std::endl;
+            }
+            return 1;
+        });
+
+    commands.emplace("help", func);
     
     CredentialStore cs{};
 
@@ -107,7 +122,7 @@ int main()
     Session currentSession{};
     currentSession.createSession();
 
-    SecureFileSystem sfs{};
+    SecureFileSystem sfs{"root"};
     AuthorizationHandler ah{&cs};
     UserAccessHandler uah{&sfs, &ah};
     Context context{&cs, &uah, currentSession};
@@ -130,7 +145,12 @@ int main()
 
         if (!commandTokens.empty())
         {
-            commands[commandTokens.front()](context, commandTokens);
+            auto it = commands.find(commandTokens.front());
+
+            if (it != commands.end())
+                commands[commandTokens.front()](context, commandTokens);
+            else
+                std::cout << "Command not found! Type 'help' for a list of commands" << std::endl;
         }
     }
 }

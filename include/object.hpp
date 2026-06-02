@@ -42,15 +42,28 @@ private:
 
     unsigned int securityDomain;
     unsigned int securityLevel;
+
+    std::weak_ptr<Object> parent;
 };
 
 class Directory : public Object
 {
 public:
+    Directory(std::string const& name, unsigned int securityDomain, unsigned int securityLevel)
+        : Object{name, securityDomain, securityLevel}
+    {}
 
+    std::vector<std::weak_ptr<Object>> getChildren() const
+    {
+        return children;
+    }
+
+    void addChild(std::weak_ptr<Object> child)
+    {
+        children.push_back(child);
+    }
 private:
-    std::weak_ptr<Directory> parent;
-
+    std::vector<std::weak_ptr<Object>> children;
 };
 
 class File : public Object
