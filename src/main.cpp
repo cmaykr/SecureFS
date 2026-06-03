@@ -115,7 +115,7 @@ int main()
 
     commands.emplace("help", func);
     
-    CredentialStore cs{};
+    CredentialStore cs{"credentials"};
 
     User currentUser{};
     bool exit = false;

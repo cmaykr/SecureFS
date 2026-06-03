@@ -8,11 +8,12 @@
 class CredentialStore
 {
 public:
-    CredentialStore() = default;
+    CredentialStore(std::string const& credentialsFilename);
 
     bool addUser(User const& newUser);
 
     User authenticateUser(User const& user) const;
 private:
     std::map<std::string, User> users;
+    std::string credentialsFilename;
 };

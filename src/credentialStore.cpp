@@ -1,29 +1,37 @@
 #include "credentialStore.hpp"
 
 #include <iostream>
+#include <fstream>
+
+CredentialStore::CredentialStore(std::string const& credentialsFilename)
+    : credentialsFilename{credentialsFilename}
+{}
 
 bool CredentialStore::addUser(User const &newUser)
 {
     User user{newUser.username, newUser.password, newUser.securityLevel, newUser.securityDomain};
-    users.try_emplace(user.username, user);
+
+    std::ofstream credentialFile {"data/" + credentialsFilename};
+
+    credentialFile << user;
+
     /// Need to check if user already exists.
     return false;
 }
 
 User CredentialStore::authenticateUser(User const &userToAuthenticate) const
 {
-    auto it = users.find(userToAuthenticate.username);
-    if (it != users.end()) // Check if user exists.
-    {
-        if (it->second.password == userToAuthenticate.password)
+    std::ifstream credentialFile{"data/" +  credentialsFilename};
+
+    User user{};
+    credentialFile >> user;
+
+    if (user.username == userToAuthenticate.username && user.password == userToAuthenticate.password)
         {
             /// Credentials match
-            User storedUser {it->second};
-            storedUser.authenticationToken = "1";
-            return storedUser;
+            user.authenticationToken = "1";
+            return user;
         }
-
-    }
 
     return User{};
 }
