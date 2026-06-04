@@ -11,9 +11,9 @@ bool CredentialStore::addUser(User const &newUser)
 {
     User user{newUser.username, newUser.password, newUser.securityLevel, newUser.securityDomain};
 
-    std::ofstream credentialFile {"data/" + credentialsFilename};
+    std::ofstream credentialFile {"data/" + credentialsFilename, std::ios::app};
 
-    credentialFile << user;
+    credentialFile << user << '\n';
 
     /// Need to check if user already exists.
     return false;

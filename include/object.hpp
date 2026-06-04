@@ -26,6 +26,16 @@ public:
         return lastModified;
     }
 
+    void setSecurityDomain(int secDomain)
+    {
+        securityDomain = secDomain;
+    }
+
+    void setSecurityLevel(int secLevel)
+    {
+        securityLevel = secLevel;
+    }
+
     unsigned int getSecurityDomain() const
     {
         return securityDomain;

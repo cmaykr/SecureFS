@@ -15,6 +15,10 @@ public:
 
     std::vector<char> getObject(Session const& session, Object* objMetadata);
 
+    void createFile(Session const& session, std::string const& filename);
+
+    void writeToFile(Session const& session, File & file, const char* data);
+
 private:
     SecureFileSystem* sfs;
     AuthorizationHandler* ah;

@@ -10,5 +10,7 @@ struct Context
     CredentialStore* cs;
     UserAccessHandler* uah;
     Session& session;
+
+    int error {0};
 };
 

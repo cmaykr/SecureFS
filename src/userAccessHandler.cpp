@@ -25,3 +25,8 @@ std::vector<char> UserAccessHandler::getObject(Session const& session, Object *o
 
     return std::vector<char>{};
 }
+
+void UserAccessHandler::writeToFile(Session const &session, File & file, const char *data)
+{
+    sfs->createFile(file, data);
+}

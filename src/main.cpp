@@ -93,6 +93,32 @@ int addUser(Context & context, std::vector<std::string> const&)
     return 0;
 }
 
+int write(Context & context, std::vector<std::string> const&)
+{
+    std::string filename{};
+    int intInput {};
+    
+    std::cout << "What should the file be called? ";
+    std::getline(std::cin, filename, '\n');
+    File fileToCreate{filename};
+    std::cout << "Which security domain should the file exist in? ";
+    intInput = getInt();
+    fileToCreate.setSecurityDomain(intInput);
+    std::cout << "Which security level should the file have? ";
+    intInput = getInt();
+    fileToCreate.setSecurityLevel(intInput);
+
+    std::cout << "Write the text that should be written to the file:" << std::endl;
+    
+    std::string text{};
+    std::getline(std::cin, text, '\n');
+
+
+    context.uah->writeToFile(context.session, fileToCreate, text.c_str());
+    
+    return 0;
+}
+
 int main()
 {
     std::unordered_map<std::string, std::function<int(Context&, std::vector<std::string>&)>> commands{};
@@ -100,6 +126,7 @@ int main()
     commands.emplace("login", Login{});
     commands.emplace("read", read);
     commands.emplace("addUser", addUser);
+    commands.emplace("write", write);
 
     auto func = std::function<int(Context&, std::vector<std::string>&)>([&commands](Context & context, std::vector<std::string> const&)
         {
@@ -110,10 +137,15 @@ int main()
             {
                 std::cout << "  " << it->first << std::endl;
             }
-            return 1;
+            return 0;
         });
 
     commands.emplace("help", func);
+    commands.emplace("logout", std::function<int(Context&, std::vector<std::string>&)>([](Context & context, std::vector<std::string> const&)
+    {
+        context.session.setUser(User{});
+        return 0;
+    }));
     
     CredentialStore cs{"credentials"};
 
@@ -132,7 +164,7 @@ int main()
     File text{"test.txt", 2, 2, 0, 0};
     sfs.createFile(text, "hello");
 
-    while (exit == false)
+    while (!std::cin.eof())
     {
         std::string command{};
         std::string args{};
