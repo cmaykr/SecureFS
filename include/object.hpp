@@ -3,16 +3,30 @@
 #include <string>
 #include <chrono>
 #include <memory>
+#include <sstream>
+#include <map>
+#include <iostream>
 
 using FileType = int;
 using Clock = std::chrono::system_clock::time_point;
 using std::chrono::system_clock;
 
+class Object;
+class Directory;
+class File;
+
 class Object
 {
 public:
+    Object() = default;
+    Object(std::string const& name, unsigned int securityDomain, unsigned int securityLevel, Directory* parent)
+        :  parent{parent}, name{name}, uid{/*Not used as of now*/}, lastModified{system_clock::now()}, securityDomain{securityDomain}, securityLevel{securityLevel}
+    {
+        // std::cout << parent->getName() << std::endl;
+    }
+
     Object(std::string const& name, unsigned int securityDomain, unsigned int securityLevel)
-        : name{name}, uid{/*Not used as of now*/}, lastModified{system_clock::now()}, securityDomain{securityDomain}, securityLevel{securityLevel}
+        : Object(name, securityDomain, securityLevel, nullptr)
     {}
 
     virtual ~Object() = default;
@@ -42,8 +56,15 @@ public:
     }
     unsigned int getSecurityLevel() const
     {
+        
         return securityLevel;
     }
+    void setParent(Directory* newParent)
+    {
+        parent = newParent;
+    }
+protected:
+    Directory* parent;
 private:
     std::string name;
     unsigned int uid;
@@ -53,27 +74,52 @@ private:
     unsigned int securityDomain;
     unsigned int securityLevel;
 
-    std::weak_ptr<Object> parent;
 };
 
 class Directory : public Object
 {
 public:
+    Directory()
+        : Object()
+    {}
+
+    Directory(std::string const& name, unsigned int securityDomain, unsigned int securityLevel, Directory* parent)
+        : Object(name, securityDomain, securityLevel, parent)
+    {
+        // std::cout << parent->getName() << std::endl;
+    }
+
     Directory(std::string const& name, unsigned int securityDomain, unsigned int securityLevel)
         : Object{name, securityDomain, securityLevel}
     {}
 
-    std::vector<std::weak_ptr<Object>> getChildren() const
+    std::map<std::string, Object*> getChildren() const
     {
         return children;
     }
 
-    void addChild(std::weak_ptr<Object> child)
+    void addChild(Object* child)
     {
-        children.push_back(child);
+        child->setParent(this);
+        children.emplace(child->getName(), child);
+    }
+
+    std::string getDirectoryTree() const
+    {
+        if (this->parent == nullptr)
+            return getName();
+
+        return this->parent->getDirectoryTree() + '/' + getName();
+    }
+
+    Directory switchDirectory(Directory const& dirToChange)
+    {
+        auto it = children.find(dirToChange.getName());
+
+        return *dynamic_cast<Directory*>(it->second);
     }
 private:
-    std::vector<std::weak_ptr<Object>> children;
+    std::map<std::string, Object*> children;
 };
 
 class File : public Object

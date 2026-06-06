@@ -14,6 +14,8 @@
 #include <map>
 #include <functional>
 
+using FunctionType = int(Context&, std::vector<std::string>&);
+
 int getInt()
 {
     std::string input{};
@@ -121,14 +123,14 @@ int write(Context & context, std::vector<std::string> const&)
 
 int main()
 {
-    std::unordered_map<std::string, std::function<int(Context&, std::vector<std::string>&)>> commands{};
+    std::unordered_map<std::string, std::function<FunctionType>> commands{};
 
     commands.emplace("login", Login{});
     commands.emplace("read", read);
     commands.emplace("addUser", addUser);
     commands.emplace("write", write);
 
-    auto func = std::function<int(Context&, std::vector<std::string>&)>([&commands](Context & context, std::vector<std::string> const&)
+    auto func = std::function<FunctionType>([&commands](Context & context, std::vector<std::string> const&)
         {
             auto it = commands.begin();
 
@@ -141,11 +143,30 @@ int main()
         });
 
     commands.emplace("help", func);
-    commands.emplace("logout", std::function<int(Context&, std::vector<std::string>&)>([](Context & context, std::vector<std::string> const&)
+    commands.emplace("logout", std::function<FunctionType>([](Context & context, std::vector<std::string> const&)
     {
         context.session.setUser(User{});
         return 0;
     }));
+
+    commands.emplace("pwd", std::function<FunctionType>([](Context & context, std::vector<std::string> const&){
+        std::cout << context.currentDirectory->getDirectoryTree() << std::endl;
+
+        return 0;
+    }));
+    commands.emplace("cd", std::function<FunctionType>([](Context & context, std::vector<std::string> const& args){
+        // std::cout << context.currentDirectory.getAbsolutePath() << std::endl;
+
+        if (args.size() != 2)
+            return -1;
+        
+        Directory* newDir = new Directory{args[1], 0, 0, context.currentDirectory}; // change to do this inside the Directory class
+        context.currentDirectory = newDir;
+        // context.currentDirectory = context->currentDirectory.switchDirectory(newDir);
+
+        return 0;
+    }));
+    
     
     CredentialStore cs{"credentials"};
 
@@ -157,12 +178,14 @@ int main()
     SecureFileSystem sfs{"root"};
     AuthorizationHandler ah{&cs};
     UserAccessHandler uah{&sfs, &ah};
-    Context context{&cs, &uah, currentSession};
+    Context context{&cs, &uah, currentSession, new Directory{"root", 0, 0}};
     std::cout << "Welcome to the secure file system handler!" << std::endl;
 
-    Login login{};
-    File text{"test.txt", 2, 2, 0, 0};
-    sfs.createFile(text, "hello");
+    Directory* childDir = new Directory{"private", 2, 1};
+    childDir->addChild(new Directory{"test", 3, 2});
+    context.currentDirectory->addChild(childDir);
+    
+
 
     while (!std::cin.eof())
     {
@@ -170,7 +193,7 @@ int main()
         std::string args{};
         std::vector<std::string> commandTokens{};
         
-        std::cout << "> ";
+        std::cout << context.currentDirectory->getDirectoryTree() << " > ";
         
         getline(std::cin, args, '\n');
         commandTokens = std::vector<std::string>{tokenizer(args)};

@@ -53,3 +53,23 @@ std::vector<char> SecureFileSystem::readFile(File const& file) const
 
     return data;
 }
+
+int SecureFileSystem::createDirectory(Directory &newDirectory, Directory const& parentDirectory)
+{
+    Object* parent = files[parentDirectory.getName()];
+
+    if (!dynamic_cast<Directory*>(parent))
+        return -1;
+
+    Directory* parentDir = dynamic_cast<Directory*>(parent);
+
+    parentDir->addChild(new Object{newDirectory});
+
+    return 0;
+
+}
+
+Directory SecureFileSystem::getDirectoryMetaData(Directory const &newDirectory) const
+{
+    return Directory(newDirectory);
+}

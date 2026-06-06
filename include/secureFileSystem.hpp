@@ -14,9 +14,12 @@ public:
     File* createFile(File & newFile, const char* data);
     std::vector<char> readFile(File const& file) const;
 
-    Directory* getDirectory(std::string const& fileName) const;
+    int createDirectory(Directory & newDirectory, Directory const& parentDirectory);
+    Directory getDirectoryMetaData(Directory const& newDirectory) const;
+
+    // Directory* getDirectory(std::string const& fileName) const;
 private:
-    std::map<std::string, Object> files; /// TODO: Use a database system for storing the metadata
+    std::map<std::string, Object*> files; /// TODO: Use a database system for storing the metadata
 
     Directory baseDirectory;
     std::string basePath;
