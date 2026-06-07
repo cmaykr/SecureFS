@@ -19,7 +19,7 @@ public:
 
     // Directory* getDirectory(std::string const& fileName) const;
 private:
-    std::map<std::string, Object*> files; /// TODO: Use a database system for storing the metadata
+    std::map<std::string, Object*> files; /// Stores the metadata about the objects on the system, and data location. Stores every single object on the system
 
     Directory baseDirectory;
     std::string basePath;

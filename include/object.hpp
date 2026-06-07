@@ -22,7 +22,7 @@ public:
     Object(std::string const& name, unsigned int securityDomain, unsigned int securityLevel, Directory* parent)
         :  parent{parent}, name{name}, uid{/*Not used as of now*/}, lastModified{system_clock::now()}, securityDomain{securityDomain}, securityLevel{securityLevel}
     {
-        // std::cout << parent->getName() << std::endl;
+
     }
 
     Object(std::string const& name, unsigned int securityDomain, unsigned int securityLevel)
@@ -64,7 +64,7 @@ public:
         parent = newParent;
     }
 protected:
-    Directory* parent;
+    Directory* parent; /// Non-owning pointer that points to the parent of the object.
 private:
     std::string name;
     unsigned int uid;
@@ -119,7 +119,7 @@ public:
         return *dynamic_cast<Directory*>(it->second);
     }
 private:
-    std::map<std::string, Object*> children;
+    std::map<std::string, Object*> children; /// List of non-owning pointers that point to all the objects in the directory.
 };
 
 class File : public Object
@@ -145,5 +145,7 @@ public:
 private:
     int size;
     FileType fileType;
+
+    char* dataLocation; /// Pointer to where the file's data is located.
 };
 

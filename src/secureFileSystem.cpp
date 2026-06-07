@@ -71,5 +71,12 @@ int SecureFileSystem::createDirectory(Directory &newDirectory, Directory const& 
 
 Directory SecureFileSystem::getDirectoryMetaData(Directory const &newDirectory) const
 {
-    return Directory(newDirectory);
+    Directory* dir = dynamic_cast<Directory*>(files.at(newDirectory.getName()));
+
+    if (dir != nullptr)
+    {
+        return *dir;
+    }
+
+    return Directory();
 }
