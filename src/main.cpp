@@ -208,4 +208,6 @@ int main()
                 std::cout << "Command not found! Type 'help' for a list of commands" << std::endl;
         }
     }
+
+    sfs.save();
 }

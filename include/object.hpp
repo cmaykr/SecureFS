@@ -63,6 +63,24 @@ public:
     {
         parent = newParent;
     }
+
+    Directory* getParent() const
+    {
+        return parent;
+    }
+
+    virtual void print(std::ostream & os) const
+    {
+        // if (getParent() != nullptr)
+        //     os << getParent()->getName();
+        os << getName() << " " << getSecurityDomain() << " " << getSecurityLevel() << " " << getSecurityDomain() << std::endl;
+    }
+
+    friend std::ostream& operator<<(std::ostream & os, Object const& obj)
+    {
+        obj.print(os);
+        return os;
+    }
 protected:
     Directory* parent; /// Non-owning pointer that points to the parent of the object.
 private:
@@ -75,6 +93,8 @@ private:
     unsigned int securityLevel;
 
 };
+
+
 
 class Directory : public Object
 {
@@ -118,9 +138,22 @@ public:
 
         return *dynamic_cast<Directory*>(it->second);
     }
+
+    friend std::ostream & operator<<(std::ostream & os, Directory const& dir)
+    {
+        dir.print(os);
+
+        for (std::pair<std::string, Object*> child: dir.getChildren())
+        {
+            os << child.second;
+        }
+        return os;
+    }
 private:
     std::map<std::string, Object*> children; /// List of non-owning pointers that point to all the objects in the directory.
 };
+
+
 
 class File : public Object
 {
@@ -142,10 +175,38 @@ public:
     {
         return fileType;
     }
+
+    void addData(char const* newData)
+    {
+        // if (data != nullptr)
+        //     delete data;
+
+        data = newData;
+    }
+
+    const char* getData() const
+    {
+        return data;
+    }
+
+    void print(std::ostream & os) const override
+    {
+        os << dynamic_cast<Object*>(const_cast<File*>(this));
+    }
+
+    friend std::ostream& operator<<(std::ostream & os, File const& file)
+    {
+        file.print(os);
+
+        os << file.getSize() << " " << file.getFileType() << " " << file.getData() << std::endl;
+        return os;
+    }
 private:
     int size;
     FileType fileType;
 
-    char* dataLocation; /// Pointer to where the file's data is located.
+    const char* data; /// Pointer to where the file's data is located.
 };
+
+
 

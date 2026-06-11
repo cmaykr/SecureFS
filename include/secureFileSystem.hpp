@@ -9,9 +9,14 @@
 class SecureFileSystem
 {
 public:
-    SecureFileSystem(std::string const& fileBasePath);
+    SecureFileSystem(std::string const& filesystemName);
 
-    File* createFile(File & newFile, const char* data);
+    ~SecureFileSystem();
+
+    /// Saves the filesystem to a file
+    bool save();
+
+    File* createFile(File & newFile, std::string parentDirectoryName, const char* data);
     std::vector<char> readFile(File const& file) const;
 
     int createDirectory(Directory & newDirectory, Directory const& parentDirectory);
@@ -21,6 +26,6 @@ public:
 private:
     std::map<std::string, Object*> files; /// Stores the metadata about the objects on the system, and data location. Stores every single object on the system
 
-    Directory baseDirectory;
-    std::string basePath;
+    std::string filesystemName;
+    Directory* rootDirectory;
 };

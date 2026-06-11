@@ -6,52 +6,81 @@
 #include <limits>
 #include <vector>
 
-SecureFileSystem::SecureFileSystem(std::string const &fileBasePath)
-    : files{}, baseDirectory{"/", 0, 0}, basePath{fileBasePath}
+SecureFileSystem::SecureFileSystem(std::string const &filesystemName)
+    : files{}, filesystemName{filesystemName}, rootDirectory{new Directory{"root", 2, 1}}
 {
 
+    std::ofstream fs{filesystemName, fs.binary | fs.out};
+
+    if (!fs.is_open())
+    {
+        std::cerr << "File failed to open" << std::endl;
+        throw std::runtime_error("File failed to open.");
+    }
+    fs.write(reinterpret_cast<char*>(&rootDirectory), sizeof rootDirectory);
+
+    files[rootDirectory->getName()] = rootDirectory;
+
+    fs.close();
 }
 
-File *SecureFileSystem::createFile(File &newFileMetadata, const char *data)
+SecureFileSystem::~SecureFileSystem()
 {
-    std::ofstream ostream(basePath + "/" + newFileMetadata.getName());
-
-    // if (ostream.good())
-    // {
-    //     return nullptr;
-    // }
-    
-    if (!ostream.is_open())
+    for (std::pair<std::string, Object*> object: files)
     {
-        std::cout << "Couldn't open file" << std::endl;
-        return nullptr;
+        delete object.second;
     }
-    else
-    {
-        ostream << data;
-        ostream.close();
+}
 
+bool SecureFileSystem::save()
+{
+    std::ofstream ofs{filesystemName, ofs.binary | ofs.in};
+
+    // ofs << *rootDirectory << std::endl;
+    for (std::pair<std::string, Object*> file: files)
+    {
+        file.second->print(ofs);
     }
-    return nullptr;
+
+    // ofs.write(reinterpret_cast<char*>(&rootDirectory), size)
+
+    ofs.close();
+
+    return true;
+}
+
+File *SecureFileSystem::createFile(File &newFileMetadata, std::string parentDirectoryName, const char *data)
+{
+    // std::ofstream fs{filesystemName}
+
+    newFileMetadata.addData(data);
+
+    Directory* curDir{newFileMetadata.getParent()};
+
+    while (true)
+    {
+        if (curDir->getParent() == nullptr)
+        {
+            // File does not have path to root
+            std::cout << "No path to root directory!" << std::endl;
+            break;
+        }
+        else if (curDir->getParent() == rootDirectory)
+        {
+            // File has path to root
+            newFileMetadata.getParent()->addChild(new File{newFileMetadata});
+        }
+        else
+        {
+            // Parent is not yet root
+            curDir = curDir->getParent();
+        }
+    }
 }
 
 std::vector<char> SecureFileSystem::readFile(File const& file) const
 {
-    // Read file and return the data.
-    // Should the data be copied?
 
-    std::ifstream ifs{basePath + "/" + file.getName()};
-    std::vector<char> data{};
-
-    int i = 0;
-    char c{};
-    while (ifs.get(c))
-    {
-        data.push_back(c);
-        ++i;
-    }
-
-    return data;
 }
 
 int SecureFileSystem::createDirectory(Directory &newDirectory, Directory const& parentDirectory)
