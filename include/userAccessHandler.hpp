@@ -13,11 +13,11 @@ public:
         : sfs{sfs}, ah{ah}
     {}
 
-    std::vector<char> getObject(Session const& session, Object* objMetadata);
+    std::vector<unsigned char> getObject(Session const& session, Object* objMetadata);
 
     void createFile(Session const& session, std::string const& filename);
 
-    void writeToFile(Session const& session, File & file, const char* data);
+    void writeToFile(Session const& session, File & file, std::vector<unsigned char> const& data);
 
 private:
     SecureFileSystem* sfs;

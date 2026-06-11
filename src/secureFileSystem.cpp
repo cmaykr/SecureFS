@@ -7,105 +7,77 @@
 #include <vector>
 
 SecureFileSystem::SecureFileSystem(std::string const &filesystemName)
-    : files{}, filesystemName{filesystemName}, rootDirectory{new Directory{"root", 2, 1}}
+    : filesystemName{filesystemName}, nodes{}
 {
-
-    std::ofstream fs{filesystemName, fs.binary | fs.out};
-
-    if (!fs.is_open())
-    {
-        std::cerr << "File failed to open" << std::endl;
-        throw std::runtime_error("File failed to open.");
-    }
-    fs.write(reinterpret_cast<char*>(&rootDirectory), sizeof rootDirectory);
-
-    files[rootDirectory->getName()] = rootDirectory;
-
-    fs.close();
+    nodes["root"] = Node{"root", {}, {}, nullptr, true}; // Root node of the file system.
 }
 
 SecureFileSystem::~SecureFileSystem()
 {
-    for (std::pair<std::string, Object*> object: files)
-    {
-        delete object.second;
-    }
 }
 
 bool SecureFileSystem::save()
 {
-    std::ofstream ofs{filesystemName, ofs.binary | ofs.in};
-
-    // ofs << *rootDirectory << std::endl;
-    for (std::pair<std::string, Object*> file: files)
-    {
-        file.second->print(ofs);
-    }
-
-    // ofs.write(reinterpret_cast<char*>(&rootDirectory), size)
-
-    ofs.close();
 
     return true;
 }
 
-File *SecureFileSystem::createFile(File &newFileMetadata, std::string parentDirectoryName, const char *data)
+void SecureFileSystem::createFile(std::string const &nodeName, std::vector<unsigned char> const& newData, std::string const& parentDirectory)
 {
-    // std::ofstream fs{filesystemName}
-
-    newFileMetadata.addData(data);
-
-    Directory* curDir{newFileMetadata.getParent()};
-
-    while (true)
+    Node newNode {};
+    if (nodes.find(parentDirectory) != nodes.end())
     {
-        if (curDir->getParent() == nullptr)
-        {
-            // File does not have path to root
-            std::cout << "No path to root directory!" << std::endl;
-            break;
-        }
-        else if (curDir->getParent() == rootDirectory)
-        {
-            // File has path to root
-            newFileMetadata.getParent()->addChild(new File{newFileMetadata});
-        }
-        else
-        {
-            // Parent is not yet root
-            curDir = curDir->getParent();
-        }
+        newNode.name = nodeName;
+        newNode.isDirectory = false;
+        newNode.data = newData;
+        newNode.parent = &nodes.at(parentDirectory);
+        nodes[newNode.name] = newNode;
+        nodes[newNode.parent->name].children.push_back(&nodes[newNode.name]);
     }
 }
 
-std::vector<char> SecureFileSystem::readFile(File const& file) const
+std::vector<unsigned char> SecureFileSystem::readFile(std::string const &fileName) const
 {
-
-}
-
-int SecureFileSystem::createDirectory(Directory &newDirectory, Directory const& parentDirectory)
-{
-    Object* parent = files[parentDirectory.getName()];
-
-    if (!dynamic_cast<Directory*>(parent))
-        return -1;
-
-    Directory* parentDir = dynamic_cast<Directory*>(parent);
-
-    parentDir->addChild(new Object{newDirectory});
-
-    return 0;
-
-}
-
-Directory SecureFileSystem::getDirectoryMetaData(Directory const &newDirectory) const
-{
-    Directory* dir = dynamic_cast<Directory*>(files.at(newDirectory.getName()));
-
-    if (dir != nullptr)
+    if (nodes.find(fileName) != nodes.end() && nodes.at(fileName).isDirectory == false)
     {
-        return *dir;
+        return nodes.at(fileName).data;
     }
 
-    return Directory();
+    return std::vector<unsigned char>();
+}
+
+void SecureFileSystem::createDirectory(std::string const &directoryName, std::string const& parentDirectory)
+{
+    if (nodes.find(parentDirectory) != nodes.end())
+    {
+        Node newNode {};
+        newNode.name = directoryName;
+        newNode.isDirectory = true;
+        newNode.parent = &nodes.at(parentDirectory);
+        nodes[newNode.name] = newNode;
+    }
+}
+
+/// @brief Currently returns a vector of pointers to the nodes, breaking encapsulation.
+/// TODO: Change to not return pointers to the actual nodes, but instead just return the metadata.
+/// @param directoryName 
+/// @return 
+std::vector<Node *> SecureFileSystem::getDirectoryChildren(std::string const &directoryName) const
+{
+    if (nodes.find(directoryName) != nodes.end())
+    {
+        return nodes.at(directoryName).children;
+    }
+    return std::vector<Node *>();
+}
+
+/// @brief Returns a node, if it exists on the filesystem. Currently breaks encapsulation by returning a pointer.
+/// TODO: Find better way to return a node's data and metadata.
+/// @param nodeName 
+/// @return 
+Node * SecureFileSystem::getNode(std::string const &nodeName)
+{
+    if (nodes.find(nodeName) != nodes.end())
+        return &nodes[nodeName];
+    return nullptr;
 }

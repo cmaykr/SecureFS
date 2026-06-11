@@ -4,11 +4,11 @@
 #include <algorithm>
 #include <iterator>
 
-std::vector<char> UserAccessHandler::getObject(Session const& session, Object *objMetadata)
+std::vector<unsigned char> UserAccessHandler::getObject(Session const& session, Object *objMetadata)
 {
     if (!ah->authorizeUserActionOnObject(session.getUser(), *objMetadata))
     {
-        return std::vector<char>{};
+        return std::vector<unsigned char>{};
     }
 
     if (dynamic_cast<Directory*>(objMetadata) != nullptr)
@@ -19,14 +19,14 @@ std::vector<char> UserAccessHandler::getObject(Session const& session, Object *o
     {
         // Object is of type File
 
-        std::vector<char> data {sfs->readFile(*dynamic_cast<File*>(objMetadata))};
+        std::vector<unsigned char> data {sfs->readFile(dynamic_cast<File*>(objMetadata)->getName())};
         return data;
     }
 
-    return std::vector<char>{};
+    return std::vector<unsigned char>{};
 }
 
-void UserAccessHandler::writeToFile(Session const &session, File & file, const char *data)
+void UserAccessHandler::writeToFile(Session const &session, File & file, std::vector<unsigned char> const& data)
 {
-    sfs->createFile(file, data);
+    sfs->createFile(file.getName(), data);
 }

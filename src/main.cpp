@@ -13,6 +13,7 @@
 #include <sstream>
 #include <map>
 #include <functional>
+#include <iterator>
 
 using FunctionType = int(Context&, std::vector<std::string>&);
 
@@ -77,7 +78,7 @@ int read(Context & context, std::vector<std::string> const& args)
     }
 
     File filename{args[1]};
-    std::vector<char> text {context.uah->getObject(context.session, &filename)};
+    std::vector<unsigned char> text {context.uah->getObject(context.session, &filename)};
 
     if (text.empty())
         return -1;
@@ -116,13 +117,14 @@ int write(Context & context, std::vector<std::string> const&)
     std::getline(std::cin, text, '\n');
 
 
-    context.uah->writeToFile(context.session, fileToCreate, text.c_str());
+    context.uah->writeToFile(context.session, fileToCreate, std::vector<unsigned char>(text.begin(), text.end()));
     
     return 0;
 }
 
 int main()
 {
+    SecureFileSystem sfs{"root"};
     std::unordered_map<std::string, std::function<FunctionType>> commands{};
 
     commands.emplace("login", Login{});
@@ -149,20 +151,18 @@ int main()
         return 0;
     }));
 
-    commands.emplace("pwd", std::function<FunctionType>([](Context & context, std::vector<std::string> const&){
-        std::cout << context.currentDirectory->getDirectoryTree() << std::endl;
+    commands.emplace("ls", std::function<FunctionType>([&sfs](Context & context, std::vector<std::string> const&){
+        std::vector<Node*> children {sfs.getDirectoryChildren("root")};
+
+        for (Node* child: children)
+        {
+            std::cout << child->name;
+        }
+        std::cout << std::endl;
 
         return 0;
     }));
     commands.emplace("cd", std::function<FunctionType>([](Context & context, std::vector<std::string> const& args){
-        // std::cout << context.currentDirectory.getAbsolutePath() << std::endl;
-
-        if (args.size() != 2)
-            return -1;
-        
-        Directory* newDir = new Directory{args[1], 0, 0, context.currentDirectory}; // change to do this inside the Directory class
-        context.currentDirectory = newDir;
-        // context.currentDirectory = context->currentDirectory.switchDirectory(newDir);
 
         return 0;
     }));
@@ -175,7 +175,6 @@ int main()
     Session currentSession{};
     currentSession.createSession();
 
-    SecureFileSystem sfs{"root"};
     AuthorizationHandler ah{&cs};
     UserAccessHandler uah{&sfs, &ah};
     Context context{&cs, &uah, currentSession, new Directory{"root", 0, 0}};
@@ -185,7 +184,7 @@ int main()
     childDir->addChild(new Directory{"test", 3, 2});
     context.currentDirectory->addChild(childDir);
     
-
+    sfs.createFile("test1", {}, "root");
 
     while (!std::cin.eof())
     {
