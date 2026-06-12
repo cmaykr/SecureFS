@@ -175,6 +175,11 @@ int main()
 
         Node* newNode{sfs.getNode(args[1])};
 
+        if (newNode == nullptr)
+        {
+            std::cout << "Directory does not exist!" << std::endl;
+            return 1;
+        }
         if (newNode->isDirectory)
         {
             context.currentDir = newNode;
@@ -200,10 +205,12 @@ int main()
     // context.currentDirectory->addChild(childDir);
     context.currentDir = sfs.getRootNode();
     
-    sfs.createFile("test1", {}, "root");
+    std::string text{"Hello, this is file test1"};
+    sfs.createFile("test1", std::vector<unsigned char>{std::begin(text), std::end(text)}, "root");
     sfs.createDirectory("layer1", "root");
     sfs.createDirectory("layer2", "layer1");
-    sfs.createFile("layer2_file", {}, "layer2");
+    text = {"This is a layer2 file"};
+    sfs.createFile("layer2_file", std::vector<unsigned char>{std::begin(text), std::end(text)}, "layer2");
 
     while (!std::cin.eof())
     {
