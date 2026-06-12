@@ -152,18 +152,33 @@ int main()
     }));
 
     commands.emplace("ls", std::function<FunctionType>([&sfs](Context & context, std::vector<std::string> const&){
-        std::vector<Node*> children {sfs.getDirectoryChildren("root")};
+        std::vector<Node*> children {sfs.getDirectoryChildren(context.currentDir->name)};
 
         for (Node* child: children)
         {
-            std::cout << child->name;
+            std::cout << child->name << " ";
         }
         std::cout << std::endl;
 
         return 0;
     }));
-    commands.emplace("cd", std::function<FunctionType>([](Context & context, std::vector<std::string> const& args){
 
+    commands.emplace("pwd", std::function<FunctionType>([&sfs](Context & context, std::vector<std::string> const&){
+        std::vector<std::string> absolutePath {sfs.getDirectoryTree(context.currentDir->name)};
+
+        std::copy(std::rbegin(absolutePath), std::rend(absolutePath), std::ostream_iterator<std::string>(std::cout, "/"));
+        std::cout << std::endl;
+
+        return 0;
+    }));
+    commands.emplace("cd", std::function<FunctionType>([&sfs](Context & context, std::vector<std::string> const& args){
+
+        Node* newNode{sfs.getNode(args[1])};
+
+        if (newNode->isDirectory)
+        {
+            context.currentDir = newNode;
+        }
         return 0;
     }));
     
@@ -182,9 +197,13 @@ int main()
 
     Directory* childDir = new Directory{"private", 2, 1};
     childDir->addChild(new Directory{"test", 3, 2});
-    context.currentDirectory->addChild(childDir);
+    // context.currentDirectory->addChild(childDir);
+    context.currentDir = sfs.getRootNode();
     
     sfs.createFile("test1", {}, "root");
+    sfs.createDirectory("layer1", "root");
+    sfs.createDirectory("layer2", "layer1");
+    sfs.createFile("layer2_file", {}, "layer2");
 
     while (!std::cin.eof())
     {
@@ -192,7 +211,10 @@ int main()
         std::string args{};
         std::vector<std::string> commandTokens{};
         
-        std::cout << context.currentDirectory->getDirectoryTree() << " > ";
+        // std::cout << context.currentDirectory->getDirectoryTree() << " > ";
+        std::vector<std::string> currDirTree { sfs.getDirectoryTree(context.currentDir->name)};
+        std::copy(std::rbegin(currDirTree), std::rend(currDirTree), std::ostream_iterator<std::string>(std::cout, "/"));
+        std::cout << " > ";
         
         getline(std::cin, args, '\n');
         commandTokens = std::vector<std::string>{tokenizer(args)};

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <limits>
 #include <vector>
+#include <algorithm>
 
 SecureFileSystem::SecureFileSystem(std::string const &filesystemName)
     : filesystemName{filesystemName}, nodes{}
@@ -55,6 +56,7 @@ void SecureFileSystem::createDirectory(std::string const &directoryName, std::st
         newNode.isDirectory = true;
         newNode.parent = &nodes.at(parentDirectory);
         nodes[newNode.name] = newNode;
+        nodes[newNode.parent->name].children.push_back(&nodes[newNode.name]);
     }
 }
 
@@ -80,4 +82,26 @@ Node * SecureFileSystem::getNode(std::string const &nodeName)
     if (nodes.find(nodeName) != nodes.end())
         return &nodes[nodeName];
     return nullptr;
+}
+
+const Node *SecureFileSystem::getRootNode() const
+{
+    return &nodes.at("root");
+}
+
+std::vector<std::string> SecureFileSystem::getDirectoryTree(std::string const &directoryName) const
+{
+    std::vector<std::string> absolutePath{};
+
+    Node* currentNodeParent {nodes.at(directoryName).parent};
+
+    absolutePath.push_back(nodes.at(directoryName).name);
+    while (currentNodeParent != nullptr && nodes.find(currentNodeParent->name) != nodes.end())
+    {
+        absolutePath.push_back(currentNodeParent->name);
+        currentNodeParent = currentNodeParent->parent;
+    }
+
+
+    return absolutePath;
 }

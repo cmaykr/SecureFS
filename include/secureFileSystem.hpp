@@ -41,6 +41,9 @@ public:
     std::vector<Node*> getDirectoryChildren(std::string const& directoryName) const;
 
     Node * getNode(std::string const& nodeName);
+    const Node* getRootNode() const;
+
+    std::vector<std::string> getDirectoryTree(std::string const& directoryName) const;
 
     // File* createFile(File & newFile, std::string parentDirectoryName, const char* data);
     // std::vector<char> readFile(File const& file) const;

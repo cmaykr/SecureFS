@@ -14,6 +14,8 @@ struct Context
 
     Directory* currentDirectory;
 
+    const Node * currentDir;
+
     int error {0};
 };
 
