@@ -13,7 +13,7 @@ public:
         : sfs{sfs}, ah{ah}
     {}
 
-    std::vector<unsigned char> getObject(Session const& session, Object* objMetadata);
+    std::vector<unsigned char> getObject(Session const& session, std::string const& fileName);
 
     void createFile(Session const& session, std::string const& filename);
 

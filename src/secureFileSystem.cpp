@@ -6,6 +6,7 @@
 #include <limits>
 #include <vector>
 #include <algorithm>
+#include <iterator>
 
 SecureFileSystem::SecureFileSystem(std::string const &filesystemName)
     : filesystemName{filesystemName}, nodes{}
@@ -31,6 +32,7 @@ void SecureFileSystem::createFile(std::string const &nodeName, std::vector<unsig
         newNode.name = nodeName;
         newNode.isDirectory = false;
         newNode.data = newData;
+        // std::copy(std::begin(newNode.data), std::end(newNode.data), std::ostream_iterator<unsigned char>(std::cout));
         newNode.parent = &nodes.at(parentDirectory);
         nodes[newNode.name] = newNode;
         nodes[newNode.parent->name].children.push_back(&nodes[newNode.name]);
@@ -39,6 +41,7 @@ void SecureFileSystem::createFile(std::string const &nodeName, std::vector<unsig
 
 std::vector<unsigned char> SecureFileSystem::readFile(std::string const &fileName) const
 {
+    std::cout << fileName << std::endl;
     if (nodes.find(fileName) != nodes.end() && nodes.at(fileName).isDirectory == false)
     {
         return nodes.at(fileName).data;

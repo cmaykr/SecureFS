@@ -4,22 +4,23 @@
 #include <algorithm>
 #include <iterator>
 
-std::vector<unsigned char> UserAccessHandler::getObject(Session const& session, Object *objMetadata)
+std::vector<unsigned char> UserAccessHandler::getObject(Session const& session, std::string const& fileName)
 {
-    if (!ah->authorizeUserActionOnObject(session.getUser(), *objMetadata))
-    {
-        return std::vector<unsigned char>{};
-    }
+    Node* node {sfs->getNode(fileName)};
+    // if (!ah->authorizeUserActionOnObject(session.getUser(), node))
+    // {
+    //     return std::vector<unsigned char>{};
+    // }
 
-    if (dynamic_cast<Directory*>(objMetadata) != nullptr)
+    if (node->isDirectory)
     {
         // Object is of type directory, return directory.
     }
-    else if (dynamic_cast<File*>(objMetadata) != nullptr)
+    else
     {
         // Object is of type File
 
-        std::vector<unsigned char> data {sfs->readFile(dynamic_cast<File*>(objMetadata)->getName())};
+        std::vector<unsigned char> data {sfs->readFile(fileName)};
         return data;
     }
 

@@ -78,7 +78,7 @@ int read(Context & context, std::vector<std::string> const& args)
     }
 
     File filename{args[1]};
-    std::vector<unsigned char> text {context.uah->getObject(context.session, &filename)};
+    std::vector<unsigned char> text {context.uah->getObject(context.session, args[1])};
 
     if (text.empty())
         return -1;
@@ -173,6 +173,15 @@ int main()
     }));
     commands.emplace("cd", std::function<FunctionType>([&sfs](Context & context, std::vector<std::string> const& args){
 
+        std::string param{args[1]};
+
+        if (param == "..")
+        {
+            if (context.currentDir->parent != nullptr)
+                context.currentDir = context.currentDir->parent;
+
+            return 0;
+        }
         Node* newNode{sfs.getNode(args[1])};
 
         if (newNode == nullptr)
